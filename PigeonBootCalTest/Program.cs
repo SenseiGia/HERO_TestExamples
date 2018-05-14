@@ -86,8 +86,8 @@ namespace PigeonBootCalTest
                         digital1.Write(false);
 
                         /* Ouput values on Display Module */
-                        goodCountDisplay.SetText("GC: " + 1000);
-                        badCountDisplay.SetText("BC: " + 20);
+                        goodCountDisplay.SetText("GC: " + goodCount);
+                        badCountDisplay.SetText("BC: " + badCount);
                         longestTimeDisplay.SetText("LT: " + longestTime);
                         shortestTimeDisplay.SetText("ST: " + shortestTime);
                         averageTimeDisplay.SetText("AT: " + averageTime);
