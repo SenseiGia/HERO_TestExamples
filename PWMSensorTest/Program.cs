@@ -81,6 +81,7 @@ namespace PWMSensorTest
                 if(btn && !lastBtn)
                 {
                     SetPositon(0);
+                    errorDisplay.SetText("Error: " + 0);
                 }
                 if (btn3 && !lastBtn3)
                 {
@@ -135,16 +136,22 @@ namespace PWMSensorTest
                 Debug.Print("mag: " + magTemp + " ana: " + anaTemp + " dif: " + difference);
                 differenceDisplay.SetText("Dif: " + difference);
 
-                if (output > -0.1 && output < 0.1)
+                if (output > -0.05 && output < 0.05)
                 {
                     /* We are slow enough to check */
-                    if (System.Math.Abs(difference) > 110)
+                    if (System.Math.Abs(difference) > 50)
                     {
                         /* Disruption in position */
                         state = false;
                         statusDisplay.SetText("Bad Postion");
                         errorDisplay.SetText("Error: " + difference);
                     }
+                }else if(System.Math.Abs(difference) > 500)
+                {
+                    /* Disruption in position */
+                    state = false;
+                    statusDisplay.SetText("Bad Postion");
+                    errorDisplay.SetText("Error: " + difference);
                 }
 
                 /* Allow some breathing room for the CAN Frames */
