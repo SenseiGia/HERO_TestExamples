@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <AssemblyName>GamepadTesting</AssemblyName>
+    <AssemblyName>GeneralPigeonTest</AssemblyName>
     <OutputType>Exe</OutputType>
-    <RootNamespace>GamepadTesting</RootNamespace>
+    <RootNamespace>GeneralPigeonTest</RootNamespace>
     <ProjectTypeGuids>{b69e3092-b931-443c-abe7-7e7b65f2a37f};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{10246281-6899-4F71-BFA5-DFEB240AB94D}</ProjectGuid>
+    <ProjectGuid>{B8A07FB4-E862-45A5-BB2B-245F7AEAD28D}</ProjectGuid>
     <TargetFrameworkVersion>v4.4</TargetFrameworkVersion>
     <NetMfTargetsBaseDir Condition="'$(NetMfTargetsBaseDir)'==''">$(MSBuildExtensionsPath32)\Microsoft\.NET Micro Framework\</NetMfTargetsBaseDir>
     <DeployDevice>Cross Link HERO .NETMF_Mini-USB</DeployDevice>
@@ -36,7 +36,9 @@
     <Compile Include="Program.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="CTRE, Version=5.1.5.0, Culture=neutral, processorArchitecture=MSIL" />
+    <Reference Include="CTRE, Version=4.4.0.4, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
     <Reference Include="ctre_netmf_native, Version=1.2.0.6, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
