@@ -11,89 +11,108 @@ namespace TalonsEverywhere
     public class Program
     {
         /* Values used to talons */
-        static int kTimeout = 10;
-        static int kNumOfTalons = 12;
+        static int kTimeout = 10000;
+        static int kNumOfTalons = 9;
         static TalonSRX[] _talonCollection = new TalonSRX[kNumOfTalons];
+        static int _talonStartIndex = 1;
 
         /* Tracking variables */
         static int passCount = 0;
         static int failCount = 0;
+        static int talonCount = 0;
 
         public static void Main()
         {
             /* Create our 12 Talons... */
-            for (int i = 0; i < kNumOfTalons ; i++)
+            for (int i = 0; i < (kNumOfTalons); i++)
             {
-                _talonCollection[i] = new TalonSRX(i);
+                _talonCollection[i] = new TalonSRX(i + _talonStartIndex);
             }
 
-            /* Set all _talons to off */
-            foreach (TalonSRX _talon in _talonCollection)
-            {
-                _talon.Set(ControlMode.PercentOutput, 0);
-
-                _talon.ConfigContinuousCurrentLimit(10, kTimeout);
-                _talon.Config_kF(0, 1, kTimeout);
-                _talon.Config_kP(0, 1, kTimeout);
-                _talon.Config_kI(0, 1, kTimeout);
-                _talon.Config_kD(0, 1, kTimeout);
-                _talon.ConfigPeakCurrentDuration(10, kTimeout);
-                _talon.ConfigPeakCurrentLimit(15, kTimeout);
-                _talon.ConfigSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 1, kTimeout);
-                _talon.ConfigNominalOutputForward(0.5f, kTimeout);
-                _talon.ConfigNominalOutputReverse(-0.5f, kTimeout);
-                _talon.ConfigPeakOutputForward(1, kTimeout);
-                _talon.ConfigPeakOutputReverse(-1, kTimeout);
-                _talon.ConfigAllowableClosedloopError(1, 100, kTimeout);
-                _talon.ConfigOpenloopRamp(2, kTimeout);
-                _talon.ConfigClosedloopRamp(2, kTimeout);
-            }
-            Debug.Print("Initial Configuration Completed.");
-
-            passCount = 0;
-            failCount = 0;
-            foreach (TalonSRX _talon in _talonCollection)
-            {
-                _talon.Config_kF(0, 1, kTimeout);
-                _talon.Config_kP(0, 1, kTimeout);
-                _talon.Config_kI(0, 1, kTimeout);
-                _talon.Config_kD(0, 1, kTimeout);
-            }
+            /* Everything should be default */
             Debug.Print("Teleop Init completed, timeout: " + kTimeout);
 
             while (true)
             {
-                /* Not sure if we need to enable talons for this test... */
-                CTRE.Phoenix.Watchdog.Feed();
+                CTRE.ErrorCode error;
+                bool errorDetected = false;
 
-                int errorDetected = 0;
-                foreach (TalonSRX _talon in _talonCollection)
+#if true
+                /* Second indexing method */
+                if (talonCount < kNumOfTalons)
                 {
-                    /* Do  bunch of configs */
-                    errorDetected += (int)_talon.ConfigContinuousCurrentLimit(10, kTimeout);
-                    errorDetected += (int)_talon.Config_kF(0, 1, kTimeout);
-                    errorDetected += (int)_talon.Config_kP(0, 1, kTimeout);
-                    errorDetected += (int)_talon.Config_kI(0, 1, kTimeout);
-                    errorDetected += (int)_talon.Config_kD(0, 1, kTimeout);
-                    errorDetected += (int)_talon.ConfigPeakCurrentDuration(10, kTimeout);
-                    errorDetected += (int)_talon.ConfigPeakCurrentLimit(15, kTimeout);
-                    errorDetected += (int)_talon.ConfigSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 1, kTimeout);
-                    errorDetected += (int)_talon.ConfigNominalOutputForward(0.5f, kTimeout);
-                    errorDetected += (int)_talon.ConfigNominalOutputReverse(-0.5f, kTimeout);
-                    errorDetected += (int)_talon.ConfigPeakOutputForward(1, kTimeout);
-                    errorDetected += (int)_talon.ConfigPeakOutputReverse(-1, kTimeout);
-                    errorDetected += (int)_talon.ConfigAllowableClosedloopError(1, 100, kTimeout);
-                    errorDetected += (int)_talon.ConfigOpenloopRamp(2, kTimeout);
-                    errorDetected += (int)_talon.ConfigClosedloopRamp(2, kTimeout);
+                    int talonNumber = _talonCollection[talonCount].GetDeviceID();
 
+                    /* Do a bunch of configs */
+                    error = _talonCollection[talonCount].ConfigContinuousCurrentLimit(10, kTimeout);
+                    if (error != CTRE.ErrorCode.OK)
+                        errorDetected = true;
+                    error = _talonCollection[talonCount].Config_kF(0, 1, kTimeout);
+                    if (error != CTRE.ErrorCode.OK)
+                        errorDetected = true;
+                    error = _talonCollection[talonCount].Config_kP(0, 1, kTimeout);
+                    if (error != CTRE.ErrorCode.OK)
+                        errorDetected = true;
+                    error = _talonCollection[talonCount].Config_kI(0, 1, kTimeout);
+                    if (error != CTRE.ErrorCode.OK)
+                        errorDetected = true;
+                    error = _talonCollection[talonCount].Config_kD(0, 1, kTimeout);
+                    if (error != CTRE.ErrorCode.OK)
+                        errorDetected = true;
+                    error = _talonCollection[talonCount].ConfigPeakCurrentDuration(10, kTimeout);
+                    if (error != CTRE.ErrorCode.OK)
+                        errorDetected = true;
+                    error = _talonCollection[talonCount].ConfigPeakCurrentLimit(15, kTimeout);
+                    if (error != CTRE.ErrorCode.OK)
+                        errorDetected = true;
+                    error = _talonCollection[talonCount].ConfigSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 1, kTimeout);
+                    if (error != CTRE.ErrorCode.OK)
+                        errorDetected = true;
+                    error = _talonCollection[talonCount].ConfigNominalOutputForward(0.5f, kTimeout);
+                    if (error != CTRE.ErrorCode.OK)
+                        errorDetected = true;
+                    error = _talonCollection[talonCount].ConfigNominalOutputReverse(-0.5f, kTimeout);
+                    if (error != CTRE.ErrorCode.OK)
+                        errorDetected = true;
+                    error = _talonCollection[talonCount].ConfigPeakOutputForward(1, kTimeout);
+                    if (error != CTRE.ErrorCode.OK)
+                        errorDetected = true;
+                    error = _talonCollection[talonCount].ConfigPeakOutputReverse(-1, kTimeout);
+                    if (error != CTRE.ErrorCode.OK)
+                        errorDetected = true;
+                    error = _talonCollection[talonCount].ConfigAllowableClosedloopError(1, 100, kTimeout);
+                    if (error != CTRE.ErrorCode.OK)
+                        errorDetected = true;
+                    error = _talonCollection[talonCount].ConfigOpenloopRamp(2, kTimeout);
+                    if (error != CTRE.ErrorCode.OK)
+                        errorDetected = true;
+                    error = _talonCollection[talonCount].ConfigClosedloopRamp(2, kTimeout);
+                    if (error != CTRE.ErrorCode.OK)
+                        errorDetected = true;
+
+                    /* just see how fast this loop goes */
+                    byte[] temp1 = new byte[8];
+                    ulong data1 = (ulong)BitConverter.ToUInt64(temp1, 0);
+                    CTRE.Native.CAN.Send(0x0000A00A, data1, 8, 0);
+
+                    if (!errorDetected)
+                        passCount++;
+                    else if (errorDetected)
+                        failCount++;
+                    
+                    Debug.Print("Config Success Count: " + passCount + " Config Fail Count: " + failCount + " Talon #: " + talonNumber);
+                    talonCount++;
                 }
-                if (errorDetected == 0)
-                    passCount++;
-                else if (errorDetected != 0)
-                    failCount++;
+                else
+                {
+                    talonCount = 0;
+                }
 
-                Debug.Print("Config Success Count: " + passCount + " Config Fail Count: " + failCount);
+                /* Sleep after every loop zzz */
+                Thread.Sleep(5);
+#endif
             }
         }
     }
 }
+
