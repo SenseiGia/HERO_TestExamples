@@ -11,8 +11,8 @@ namespace TalonsEverywhere
     public class Program
     {
         /* Values used to talons */
-        static int kTimeout = 10000;
-        static int kNumOfTalons = 9;
+        static int kTimeout = 15;
+        static int kNumOfTalons = 12;
         static TalonSRX[] _talonCollection = new TalonSRX[kNumOfTalons];
         static int _talonStartIndex = 1;
 
@@ -28,7 +28,8 @@ namespace TalonsEverywhere
             {
                 _talonCollection[i] = new TalonSRX(i + _talonStartIndex);
             }
-
+            foreach (TalonSRX _talon in _talonCollection)
+                _talon.SetStatusFramePeriod(StatusFrameEnhanced.Status_7_CommStatus, 250, kTimeout);
             /* Everything should be default */
             Debug.Print("Teleop Init completed, timeout: " + kTimeout);
 
@@ -37,7 +38,6 @@ namespace TalonsEverywhere
                 CTRE.ErrorCode error;
                 bool errorDetected = false;
 
-#if true
                 /* Second indexing method */
                 if (talonCount < kNumOfTalons)
                 {
@@ -45,49 +45,49 @@ namespace TalonsEverywhere
 
                     /* Do a bunch of configs */
                     error = _talonCollection[talonCount].ConfigContinuousCurrentLimit(10, kTimeout);
-                    if (error != CTRE.ErrorCode.OK)
+                    if (error != CTRE.ErrorCode.OK && error != CTRE.ErrorCode.CAN_TX_FULL)
                         errorDetected = true;
                     error = _talonCollection[talonCount].Config_kF(0, 1, kTimeout);
-                    if (error != CTRE.ErrorCode.OK)
+                    if (error != CTRE.ErrorCode.OK && error != CTRE.ErrorCode.CAN_TX_FULL)
                         errorDetected = true;
                     error = _talonCollection[talonCount].Config_kP(0, 1, kTimeout);
-                    if (error != CTRE.ErrorCode.OK)
+                    if (error != CTRE.ErrorCode.OK && error != CTRE.ErrorCode.CAN_TX_FULL)
                         errorDetected = true;
                     error = _talonCollection[talonCount].Config_kI(0, 1, kTimeout);
-                    if (error != CTRE.ErrorCode.OK)
+                    if (error != CTRE.ErrorCode.OK && error != CTRE.ErrorCode.CAN_TX_FULL)
                         errorDetected = true;
                     error = _talonCollection[talonCount].Config_kD(0, 1, kTimeout);
-                    if (error != CTRE.ErrorCode.OK)
+                    if (error != CTRE.ErrorCode.OK && error != CTRE.ErrorCode.CAN_TX_FULL)
                         errorDetected = true;
                     error = _talonCollection[talonCount].ConfigPeakCurrentDuration(10, kTimeout);
-                    if (error != CTRE.ErrorCode.OK)
+                    if (error != CTRE.ErrorCode.OK && error != CTRE.ErrorCode.CAN_TX_FULL)
                         errorDetected = true;
                     error = _talonCollection[talonCount].ConfigPeakCurrentLimit(15, kTimeout);
-                    if (error != CTRE.ErrorCode.OK)
+                    if (error != CTRE.ErrorCode.OK && error != CTRE.ErrorCode.CAN_TX_FULL)
                         errorDetected = true;
                     error = _talonCollection[talonCount].ConfigSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 1, kTimeout);
-                    if (error != CTRE.ErrorCode.OK)
+                    if (error != CTRE.ErrorCode.OK && error != CTRE.ErrorCode.CAN_TX_FULL)
                         errorDetected = true;
                     error = _talonCollection[talonCount].ConfigNominalOutputForward(0.5f, kTimeout);
-                    if (error != CTRE.ErrorCode.OK)
+                    if (error != CTRE.ErrorCode.OK && error != CTRE.ErrorCode.CAN_TX_FULL)
                         errorDetected = true;
                     error = _talonCollection[talonCount].ConfigNominalOutputReverse(-0.5f, kTimeout);
-                    if (error != CTRE.ErrorCode.OK)
+                    if (error != CTRE.ErrorCode.OK && error != CTRE.ErrorCode.CAN_TX_FULL)
                         errorDetected = true;
                     error = _talonCollection[talonCount].ConfigPeakOutputForward(1, kTimeout);
-                    if (error != CTRE.ErrorCode.OK)
+                    if (error != CTRE.ErrorCode.OK && error != CTRE.ErrorCode.CAN_TX_FULL)
                         errorDetected = true;
                     error = _talonCollection[talonCount].ConfigPeakOutputReverse(-1, kTimeout);
-                    if (error != CTRE.ErrorCode.OK)
+                    if (error != CTRE.ErrorCode.OK && error != CTRE.ErrorCode.CAN_TX_FULL)
                         errorDetected = true;
                     error = _talonCollection[talonCount].ConfigAllowableClosedloopError(1, 100, kTimeout);
-                    if (error != CTRE.ErrorCode.OK)
+                    if (error != CTRE.ErrorCode.OK && error != CTRE.ErrorCode.CAN_TX_FULL)
                         errorDetected = true;
                     error = _talonCollection[talonCount].ConfigOpenloopRamp(2, kTimeout);
-                    if (error != CTRE.ErrorCode.OK)
+                    if (error != CTRE.ErrorCode.OK && error != CTRE.ErrorCode.CAN_TX_FULL)
                         errorDetected = true;
                     error = _talonCollection[talonCount].ConfigClosedloopRamp(2, kTimeout);
-                    if (error != CTRE.ErrorCode.OK)
+                    if (error != CTRE.ErrorCode.OK && error != CTRE.ErrorCode.CAN_TX_FULL)
                         errorDetected = true;
 
                     /* just see how fast this loop goes */
@@ -108,9 +108,7 @@ namespace TalonsEverywhere
                     talonCount = 0;
                 }
 
-                /* Sleep after every loop zzz */
                 Thread.Sleep(5);
-#endif
             }
         }
     }

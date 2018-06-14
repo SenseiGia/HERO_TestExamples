@@ -2,7 +2,7 @@
 using System.Threading;
 using Microsoft.SPOT;
 using Microsoft.SPOT.Hardware;
-
+using CTRE.Phoenix.MotorControl;
 namespace PigeonBootCalTest
 {
     public class Program
@@ -22,6 +22,7 @@ namespace PigeonBootCalTest
 
         /* Timing */
         static CTRE.Phoenix.Stopwatch myStopwatch = new CTRE.Phoenix.Stopwatch();
+        static CTRE.Phoenix.Stopwatch _pigeonStopwatch = new CTRE.Phoenix.Stopwatch();
 
         /* Variables */
         static int state = 0;
@@ -33,11 +34,15 @@ namespace PigeonBootCalTest
         static float currentDuration = 0;
         static float averageTime = 0;
         static double sum = 0;
+        static float Timeout = 300; // 5 Minutes 
         /* Pigeon time */
         static int temp = 0;
         static int tempTime = 0;
         static bool checkReset = true;
         static bool isPigeonStale = false;
+        /* Talon time */
+        static float _talonStartTime = 0;
+        static float _pigeonDuration = 0;
 
         public static void Main()
         {
@@ -97,47 +102,63 @@ namespace PigeonBootCalTest
                     case 1:
                         /* Ensure Pigeon is Initializing, this tells us that we have entered a new reset */
                         if (_pidgey.GetState() == CTRE.Phoenix.Sensors.PigeonState.Initializing)
+                        {
+                            /* Get Time of start */
+                            _talonStartTime = myStopwatch.Duration;
                             state = 2;
+                        }
+
 
                         /* Timeout */
-                        if (currentDuration >= 20)
-                            state = 5;
+                        if (currentDuration >= Timeout)
+                            state = 6;
 
                         break;
                     case 2:
-                        /* Wait until the pigeon finished boot/cal to decide pigeon connection is good */
-                        if (_pidgey.GetState() == CTRE.Phoenix.Sensors.PigeonState.Ready)
-                            state = 3;      // Proceed to next state
+                        _talon.Set(ControlMode.PercentOutput, 0.08f);
 
-                        /* Timeout */
-                        if (currentDuration >= 20)
-                            state = 5;
+                        /* Run motor for 3 seconds */
+                        if (currentDuration >= 5)
+                        {
+                            _pigeonStopwatch.Start();
+                            state = 3;
+                        }
                         break;
                     case 3:
+                        _talon.Set(ControlMode.PercentOutput, 0);
+                        /* Wait until the pigeon finished boot/cal to decide pigeon connection is good */
+                        if (_pidgey.GetState() == CTRE.Phoenix.Sensors.PigeonState.Ready)
+                            state = 4;      // Proceed to next state
+
+                        /* Timeout */
+                        if (currentDuration >= Timeout)
+                            state = 6;
+                        break;
+                    case 4:
                         /* Track Time */
 
                         if (longestTime == 0 && shortestTime == 0)
                         {
                             /* No times stored, load up with currentDuration */
-                            longestTime = currentDuration;
-                            shortestTime = currentDuration;
+                            longestTime = _pigeonDuration;
+                            shortestTime = _pigeonDuration;
                         }
                         else
                         {
                             /* Update longest/shortest time */
-                            if (currentDuration > longestTime)
-                                longestTime = currentDuration;
-                            else if (currentDuration < shortestTime)
-                                shortestTime = currentDuration;
+                            if (_pigeonDuration > longestTime)
+                                longestTime = _pigeonDuration;
+                            else if (_pigeonDuration < shortestTime)
+                                shortestTime = _pigeonDuration;
                         }
 
                         /* Average must be done here to record the correct time */
-                        sum += currentDuration;
+                        sum += _pigeonDuration;
                         averageTime = (float)sum / (goodCount + 1);
 
-                        state = 4;
+                        state = 5;
                         break;
-                    case 4:
+                    case 5:
                         /* Increment good count */
                         goodCount++;
 
@@ -151,9 +172,10 @@ namespace PigeonBootCalTest
                             state = 0;
 
                         break;
-                    case 5:
+                    case 6:
                         /* Increment bad count */
                         badCount++;
+                        longestTime = currentDuration;
 
                         digital1.Write(true);
                         Thread.Sleep(1000);
@@ -168,6 +190,8 @@ namespace PigeonBootCalTest
 
                 /* Print current status 1 = Initialization, 2 = ready, other values only work on CAN */
                 statusDisplay.SetText("PS: " + _pidgey.GetState());
+
+                _pigeonDuration = _pigeonStopwatch.Duration;
 
                 /* Print current cycle time */
                 currentDuration = myStopwatch.Duration;
@@ -189,6 +213,16 @@ namespace PigeonBootCalTest
                         /* Pigeon stale, notify */
                         isPigeonStale = true;
                     }
+                }
+
+                if (HeroButton.Read())
+                {
+                    longestTime = 0;
+                    shortestTime = 0;
+                    averageTime = 0;
+                    goodCount = 0;
+                    badCount = 0;
+                    sum = 0;
                 }
 
                 /* The usual thread sleep */
