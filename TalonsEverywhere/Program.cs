@@ -12,9 +12,9 @@ namespace TalonsEverywhere
     {
         /* Values used to talons */
         static int kTimeout = 10;
-        static int kNumOfTalons = 15;
+        static int kNumOfTalons = 16;
         static TalonSRX[] _talonCollection = new TalonSRX[kNumOfTalons];
-        static int _talonStartIndex = 1;
+        static int _talonStartIndex = 0;
 
         /* Tracking variables */
         static int passCount = 0;
@@ -28,13 +28,14 @@ namespace TalonsEverywhere
             {
                 _talonCollection[i] = new TalonSRX(i + _talonStartIndex);
             }
-
             ///* Set Status Frame 7, Check for Dropped Transmit */
             //foreach (TalonSRX _talon in _talonCollection)
-            //    _talon.SetStatusFramePeriod(StatusFrameEnhanced.Status_7_CommStatus, 50, kTimeout);
+            //    _talon.SetStatusFramePeriod(StatusFrameEnhanced.Status_7_CommStatus, 150, kTimeout);
+
 
             /* Init done, indicate current timeout value */
             Debug.Print("Teleop Init completed, timeout: " + kTimeout);
+            int value = 0;
 
             while (true)
             {
@@ -85,6 +86,14 @@ namespace TalonsEverywhere
                         passCount++;
                     else if (errorDetected)
                         failCount++;
+
+                    if(talonNumber == 13)
+                    {
+                        /* test setselectesendosr*/
+                        value++;
+                        _talonCollection[talonCount].SetSelectedSensorPosition(value, 0, kTimeout);
+                        _talonCollection[talonCount].GetSelectedSensorPosition(0);
+                    }
 
                     byte[] temp1 = new byte[8];
                     ulong data1 = (ulong)BitConverter.ToUInt64(temp1, 0);

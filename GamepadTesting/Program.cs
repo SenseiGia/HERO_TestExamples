@@ -37,7 +37,7 @@ namespace GamepadTesting
                     if (_currentBtns[9] || _currentBtns[10])
                     {
                         /* Comment out to remove error */
-                        _currentBtns[0] = _gamepad.GetButton(0);
+                        //_currentBtns[0] = _gamepad.GetButton(0);
                         String testPrint = "";
 
                         /* Print current status of all buttons */

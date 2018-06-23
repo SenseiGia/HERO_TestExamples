@@ -32,6 +32,7 @@ namespace PigeonBootCalTest.Properties
         [System.SerializableAttribute()]
         internal enum FontResources : short
         {
+            small = 13070,
             NinaB = 18060,
         }
     }

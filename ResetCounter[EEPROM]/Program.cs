@@ -11,44 +11,79 @@ namespace ReseCounter
         /* Hardware */
         static CTRE.HERO.OnboardEEPROM _eeprom = CTRE.HERO.OnboardEEPROM.Instance;                  // HERO's EEPROM
         static InputPort _button = new InputPort((Cpu.Pin)0x42, false, Port.ResistorMode.Disabled); // HERO's Button
+        static CTRE.Phoenix.Stopwatch _stopwatch = new CTRE.Phoenix.Stopwatch();
 
         /* Constants */
         static uint kHeader = 0x0A0A0A0A;
         static uint kChecksum = 0xFAAAAAAA;
         static uint kAddress = 0x000000;
-        static byte variableCount = 1;      // Determines number of uints to be read, statically create local array
+        static byte variableCount = 2;      // Determines number of uints to be read, statically create local array
 
         /* Variables */
         static uint[] storageArray = new uint[variableCount];
         static ArrayList generalArray = new ArrayList();
-        static uint resetCount = 0;
+        static uint writeCount = 0;
+
+        /* Uptime stuff */
+        static int kTimeHeld = 5; // Seconds
 
         public static void Main()
         {
+            /* Start overall timer */
+            _stopwatch.Start();
+
             /* Read */
             ReadEEPROM();
 
-            /* Update */
-            resetCount = storageArray[0];
-            resetCount++;
+            /* Grab previous write count */
+            writeCount = storageArray[0];
 
-            /* Output */
-            Debug.Print("Bootup Count: " + resetCount);
+            /* Output write count and show previous uptime */
+            Debug.Print("Button Press Count: " + writeCount + " Previous Uptime: " + storageArray[1]);
 
-            /* Write */
-            generalArray.Add(resetCount);
-            WriteEEPROM(generalArray);
-
+            bool _lastButtonReadState = false;
+            int _startTime = 0;
+            bool _firstTime = false;
             while (true)
             {
-                if (_button.Read())
+                /* Update button */
+                bool _ButtonReadState = _button.Read();
+                /* Update time */
+                float _currentTime = DateTime.Now.Second;
+
+                /* If button is held down for 5 seconds, reset */
+                if (_ButtonReadState)
                 {
-                    _eeprom.Erase4KB(kAddress);
-                    ReadEEPROM();
-                    resetCount = storageArray[0];
-                    Debug.Print("Bootup Count: " + resetCount);
+                    if (_firstTime)
+                        _startTime = DateTime.Now.Second;
+                    else
+                    {
+                        if (_currentTime >= (_startTime + kTimeHeld))
+                        {
+                            /* Clear EEPROM */
+                            _eeprom.Erase4KB(kAddress);
+                            Debug.Print("EEPROM Cleared");
+                            _startTime = DateTime.Now.Second; //Reset the time held to prevent instant continous clears
+                        }
+                    }
+                }
+                else
+                {
+                    _firstTime = true;
                 }
 
+                /* Write EEPROM if button pressed */
+                if (_ButtonReadState && !_lastButtonReadState)
+                {
+                    /* Write EEPROm */
+                    writeCount++;
+                    generalArray.Add(writeCount);
+                    generalArray.Add((uint)_stopwatch.Duration);
+                    WriteEEPROM(generalArray);
+                    Debug.Print("Updated uptime and write count");
+                }
+                _lastButtonReadState = _ButtonReadState;
+               
                 /* Clear array for future writes */
                 generalArray.Clear();
 
